@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using TaskTracker.Domain.Entities;
 
 namespace TaskTracker.Infrastructure;
@@ -18,5 +17,4 @@ public class ApplicationDbContext : DbContext
     {
         optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=TaskTracker;Trusted_Connection=True;", b => b.MigrationsAssembly("TaskTracker.API"));
     }
-
 }
