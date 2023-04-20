@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using TaskTracker.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    DatabaseInitializer.Initialize(scope.ServiceProvider);
+}
 
 if (app.Environment.IsDevelopment())
 {

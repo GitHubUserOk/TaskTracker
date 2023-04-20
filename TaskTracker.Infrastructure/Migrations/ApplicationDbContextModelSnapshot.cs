@@ -8,7 +8,7 @@ using TaskTracker.Infrastructure;
 
 #nullable disable
 
-namespace TaskTracker.API.Migrations
+namespace TaskTracker.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -30,6 +30,9 @@ namespace TaskTracker.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsMarked")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -50,6 +53,9 @@ namespace TaskTracker.API.Migrations
 
                     b.Property<int>("CounterpartyId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsMarked")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -84,6 +90,9 @@ namespace TaskTracker.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsMarked")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
@@ -110,6 +119,9 @@ namespace TaskTracker.API.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsMarked")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -8,7 +8,7 @@ public class Task
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
-
+    public bool IsMarked { get; set; }
     [MaxLength(100)]
     public string Title { get; set; }
     public string Description { get; set; }

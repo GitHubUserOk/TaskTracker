@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Net.Mime;
 using TaskTracker.Domain.Entities;
 using TaskTracker.Infrastructure;
 
@@ -7,61 +9,78 @@ namespace TaskTracker.API.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Produces(MediaTypeNames.Application.Json)]
     public class CounterpartyController : ControllerBase
     {
         private readonly ApplicationDbContext _contextDb;
-        public CounterpartyController(ApplicationDbContext context)
+        public CounterpartyController(ApplicationDbContext contextDb)
         {
-            _contextDb = context;
+            _contextDb = contextDb;
 
         }
-        // GET: api/<CounterpartyController>
+        // GET: api/v1
         [HttpGet]
-        public async Task<ActionResult<Counterparty>> OnGetAll()
+        [ProducesResponseType(typeof(Counterparty), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Counterparty>> GetAll()
         {
             return Ok(await _contextDb.Counterparty.ToListAsync());
         }
 
-/*        // GET api/<CounterpartyController>/5
+        // GET api/v1/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(Counterparty), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Counterparty>> GetById(int id)
         {
-            return "value";
-        }*/
+            if(id <= 0) return BadRequest();
+            
+            var counterparty = await _contextDb.Counterparty.SingleOrDefaultAsync(x => x.Id == id);
 
-        // POST api/<CounterpartyController>
+            if(counterparty == null) return NotFound($"Counterparty with {id} not found");
+
+            return Ok(counterparty);
+        }
+
+        // POST api/v1
         [HttpPost]
-        public async Task<ActionResult<Counterparty>> OnPost([FromBody] Counterparty counterparty)
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(Counterparty), (int)HttpStatusCode.Created)]
+        public async Task<ActionResult<Counterparty>> Create([FromBody] Counterparty counterparty)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            };
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             _contextDb.Counterparty.Add(counterparty);
 
-            try
-            {
-                await _contextDb.SaveChangesAsync();
+            await _contextDb.SaveChangesAsync();
 
-                return Ok(counterparty);
-            }
-            catch (Exception ex)
-            {
-                return Problem("Internal Server Error", "", 500);
-            }
+            return CreatedAtAction("CounterpartyCreated", counterparty);
         }
 
-/*        // PUT api/<CounterpartyController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // PUT api/v1
+        [HttpPut]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(Counterparty), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(Counterparty), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Counterparty>> Put([FromBody] Counterparty incomingCounterparty)
         {
-        }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        // DELETE api/<CounterpartyController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }*/
+            if (incomingCounterparty.Id <= 0) return BadRequest();
+
+            var counterparty = await _contextDb.Counterparty.SingleOrDefaultAsync(x => x.Id == incomingCounterparty.Id);
+
+            if (counterparty == null) return NotFound($"Counterparty with {incomingCounterparty.Id} not found");
+
+            counterparty.FillPropertyValues(incomingCounterparty);
+
+            _contextDb.Counterparty.Update(counterparty);
+
+            await _contextDb.SaveChangesAsync();
+
+            return Ok(counterparty);
+        }
     }
 }
