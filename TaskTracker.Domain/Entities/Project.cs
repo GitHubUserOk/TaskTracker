@@ -8,7 +8,8 @@ public class Project
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     public bool IsMarked { get; set; }
-    public Counterparty Counterparty { get; set; }
+    [Required]
+    public Counterparty Counterparty { get; set; } = null!;
     [Required]
     [MaxLength(100)]
     public string Name { get; set; } = null!;

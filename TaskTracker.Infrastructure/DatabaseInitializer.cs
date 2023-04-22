@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TaskTracker.Domain.Entities;
-using Task = TaskTracker.Domain.Entities.Task;
 
 namespace TaskTracker.Infrastructure;
 
@@ -48,7 +47,7 @@ public static class DatabaseInitializer
 
             context.User.Add(user1);
 
-            var task1 = new Task()
+            var task1 = new Domain.Entities.Task()
             {
                 Author = user1,
                 Counterparty = counterparty1,
