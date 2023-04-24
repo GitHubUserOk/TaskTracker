@@ -7,6 +7,7 @@ using TaskTracker.API.Controllers.Shared;
 using TaskTracker.API.DTOs.Counterparties;
 using TaskTracker.Domain.Entities;
 using TaskTracker.Infrastructure;
+using TaskTracker.Infrastructure.Repositories;
 
 namespace TaskTracker.API.Controllers
 {
@@ -15,17 +16,18 @@ namespace TaskTracker.API.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class CounterpartyController : ControllerBase
     {
-        private readonly ApplicationDbContext _contextDb;
-        public CounterpartyController(ApplicationDbContext contextDb)
+         private readonly ICounterpartyRepo _repo;
+
+        public CounterpartyController(ICounterpartyRepo repo)
         {
-            _contextDb = contextDb;
+            _repo = repo;
         }
 
         [HttpGet]
         [ProducesResponseType(typeof(List<Counterparty>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<List<Counterparty>>> GetAll()
         {
-            return Ok(await _contextDb.Counterparty.ToListAsync());
+            return Ok(await _repo.GetAll());
         }
 
         [HttpGet("{id}")]
@@ -33,9 +35,9 @@ namespace TaskTracker.API.Controllers
         [ProducesResponseType(typeof(Counterparty), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Counterparty>> GetById(int id)
         {          
-            var counterparty = await _contextDb.Counterparty.SingleOrDefaultAsync(_ => _.Id == id);
+            var counterparty = await _repo.GetById(id);
 
-            if(counterparty == null) return NotFound(new NotFoundByIdResponse(typeof(Counterparty).Name, id));
+            if (counterparty == null) return NotFound(new NotFoundByIdResponse(typeof(Counterparty).Name, id));
  
             return Ok(counterparty);
         }
@@ -44,7 +46,7 @@ namespace TaskTracker.API.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(Counterparty), (int)HttpStatusCode.Created)]
-        public async Task<ActionResult<Counterparty>> AddCounterparty([FromBody, Required] AddCounterpartyRequest model)
+        public async Task<ActionResult<Counterparty>> Add([FromBody, Required] AddCounterpartyRequest model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -53,11 +55,10 @@ namespace TaskTracker.API.Controllers
                 Name = model.Name
             };
 
-            _contextDb.Counterparty.Add(counterparty);
+            await _repo.Add(counterparty);
+            await _repo.SaveChanges();
 
-            await _contextDb.SaveChangesAsync();
-
-            return CreatedAtAction("AddCounterparty", counterparty);
+            return CreatedAtAction("Add", counterparty);
         }
 
         [HttpPut]
@@ -65,20 +66,18 @@ namespace TaskTracker.API.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(Counterparty), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(Counterparty), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<Counterparty>> UpdateCounterparty([FromBody, Required] UpdateCounterpartyRequest model)
+        public async Task<ActionResult<Counterparty>> Update([FromBody, Required] UpdateCounterpartyRequest model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var counterparty = await _contextDb.Counterparty.SingleOrDefaultAsync(_ => _.Id == model.Id);
+            var counterparty = await _repo.GetById(model.Id);
 
             if (counterparty == null) return NotFound(new NotFoundByIdResponse(typeof(Counterparty).Name, model.Id));
 
             counterparty.IsMarked = model.IsMarked;
             counterparty.Name = model.Name;
 
-            _contextDb.Counterparty.Update(counterparty);
-
-            await _contextDb.SaveChangesAsync();
+            await _repo.SaveChanges();
 
             return Ok(counterparty);
         }

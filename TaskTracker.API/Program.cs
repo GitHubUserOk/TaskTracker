@@ -1,4 +1,5 @@
 using TaskTracker.Infrastructure;
+using TaskTracker.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDbContext>();
+builder.Services.AddScoped<ICounterpartyRepo, CounterpartyRepo>();
 
 var app = builder.Build();
 
