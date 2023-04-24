@@ -34,11 +34,4 @@ public class CounterpartyRepo : ICounterpartyRepo
     {
         await _context.SaveChangesAsync();
     }
-
-/*    public async Task Update(Counterparty counterparty)
-    {
-        if (counterparty == null) throw new ArgumentNullException(nameof(counterparty));
-
-        _context.Counterparty.Update(counterparty);
-    }*/
 }

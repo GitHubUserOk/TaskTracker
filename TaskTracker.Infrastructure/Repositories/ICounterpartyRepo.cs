@@ -10,5 +10,4 @@ public interface ICounterpartyRepo
     Task<IEnumerable<Counterparty>> GetAll();
     Task<Counterparty> GetById(int id);
     Task Add(Counterparty counterparty);
-    //Task Update(Counterparty counterparty);
 }
