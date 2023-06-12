@@ -10,10 +10,12 @@ public class Task
     public int Id { get; set; }
     public bool IsMarked { get; set; }
     [MaxLength(100)]
-    public string Title { get; set; }
-    public string Description { get; set; }
+    public string Title { get; set; } = null!;
+    [MaxLength]
+    public string? Description { get; set; }
     public DateTime CreatedDate { get; set; }
-    public User Author { get; set; }
-    public Counterparty Counterparty { get; set; }
-    public Project? Project { get; set; }
+    public int AuthorId { get; set; }
+    public int CounterpartyId { get; set; }
+    public int ProjectId { get; set; }
+    public int BasisTaskId { get; set; }
 }

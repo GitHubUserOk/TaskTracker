@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using TaskTracker.Domain.Entities;
 
 namespace TaskTracker.Infrastructure;
-
 public static class DatabaseInitializer
 {
     public static void Initialize(IServiceProvider serviceProvider)
@@ -12,7 +11,7 @@ public static class DatabaseInitializer
             serviceProvider.GetRequiredService<
                 DbContextOptions<ApplicationDbContext>>()))
         {
-            if (context.Counterparty.Any())
+            if (context.Counterparties.Any())
             {
                return;
             }
@@ -22,15 +21,15 @@ public static class DatabaseInitializer
                 Name = "Unit A"
             };
 
-            context.Counterparty.Add(counterparty1);
+            context.Counterparties.Add(counterparty1);
 
             var project1 = new Project()
             {
-                Counterparty= counterparty1,
+                Counterparty = counterparty1,
                 Name = "Поточна підтримка"
             };
 
-            context.Project.Add(project1);
+            context.Projects.Add(project1);
 
             var project2 = new Project()
             {
@@ -38,26 +37,28 @@ public static class DatabaseInitializer
                 Name = "Впровадження WMS"
             };
 
-            context.Project.Add(project2);
+            context.Projects.Add(project2);
 
             var user1 = new User()
             {
                 Name = "Швидкий Олександр"
             };
 
-            context.User.Add(user1);
+            context.Users.Add(user1);
+
+            context.SaveChanges();
 
             var task1 = new Domain.Entities.Task()
             {
-                Author = user1,
-                Counterparty = counterparty1,
-                CreatedDate = DateTime.Now,
+                AuthorId = user1.Id,
+                CounterpartyId = counterparty1.Id,
+                CreatedDate = DateTime.UtcNow,
                 Description = "Провести навчання співробітників складу з виконання кластерного відбору",
-                Project = project2,
+                ProjectId = project2.Id,
                 Title = "Навчання співробітників"
             };
 
-            context.Task.Add(task1);
+            context.Tasks.Add(task1);
 
             context.SaveChanges();
         }

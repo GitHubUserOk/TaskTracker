@@ -40,7 +40,29 @@ namespace TaskTracker.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Counterparty");
+                    b.ToTable("Counterparties");
+                });
+
+            modelBuilder.Entity("TaskTracker.Domain.Entities.Performer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TaskId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Performers");
                 });
 
             modelBuilder.Entity("TaskTracker.Domain.Entities.Project", b =>
@@ -51,7 +73,7 @@ namespace TaskTracker.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CounterpartyId")
+                    b.Property<int?>("CounterpartyId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsMarked")
@@ -66,7 +88,7 @@ namespace TaskTracker.Infrastructure.Migrations
 
                     b.HasIndex("CounterpartyId");
 
-                    b.ToTable("Project");
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("TaskTracker.Domain.Entities.Task", b =>
@@ -80,6 +102,9 @@ namespace TaskTracker.Infrastructure.Migrations
                     b.Property<int>("AuthorId")
                         .HasColumnType("int");
 
+                    b.Property<int>("BasisTaskId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CounterpartyId")
                         .HasColumnType("int");
 
@@ -87,13 +112,12 @@ namespace TaskTracker.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsMarked")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("ProjectId")
+                    b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -103,13 +127,7 @@ namespace TaskTracker.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorId");
-
-                    b.HasIndex("CounterpartyId");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("Task");
+                    b.ToTable("Tasks");
                 });
 
             modelBuilder.Entity("TaskTracker.Domain.Entities.User", b =>
@@ -130,43 +148,16 @@ namespace TaskTracker.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("TaskTracker.Domain.Entities.Project", b =>
                 {
                     b.HasOne("TaskTracker.Domain.Entities.Counterparty", "Counterparty")
                         .WithMany()
-                        .HasForeignKey("CounterpartyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CounterpartyId");
 
                     b.Navigation("Counterparty");
-                });
-
-            modelBuilder.Entity("TaskTracker.Domain.Entities.Task", b =>
-                {
-                    b.HasOne("TaskTracker.Domain.Entities.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaskTracker.Domain.Entities.Counterparty", "Counterparty")
-                        .WithMany()
-                        .HasForeignKey("CounterpartyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaskTracker.Domain.Entities.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId");
-
-                    b.Navigation("Author");
-
-                    b.Navigation("Counterparty");
-
-                    b.Navigation("Project");
                 });
 #pragma warning restore 612, 618
         }

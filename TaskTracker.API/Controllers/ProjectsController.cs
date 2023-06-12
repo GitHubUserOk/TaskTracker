@@ -13,19 +13,20 @@ namespace TaskTracker.API.Controllers;
 [Route("api/v1/[controller]")]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
-public class ProjectController : ControllerBase
+public class ProjectsController : ControllerBase
 {
-    private readonly ApplicationDbContext _contextDb;
-    public ProjectController(ApplicationDbContext contextDb)
+    private readonly ApplicationDbContext _dbContext;
+
+    public ProjectsController(ApplicationDbContext context)
     {
-        _contextDb = contextDb;
+        _dbContext = context;
     }
 
     [HttpGet]
     [ProducesResponseType(typeof(List<Project>), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<List<Project>>> GetAll()
     {
-        return Ok(await _contextDb.Project.Include(_ => _.Counterparty).ToListAsync());
+        return Ok(await _dbContext.Projects.AsNoTracking().Include(_ => _.Counterparty).ToListAsync());
     }
 
     [HttpGet("{id}")]
@@ -33,7 +34,7 @@ public class ProjectController : ControllerBase
     [ProducesResponseType(typeof(Project), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<Project>> GetById(int id)
     {
-        var project = await _contextDb.Project.Include(_ => _.Counterparty).SingleOrDefaultAsync(_ => _.Id == id);
+        var project = await _dbContext.Projects.AsNoTracking().Include(_ => _.Counterparty).SingleOrDefaultAsync(_ => _.Id == id);
 
         if (project == null) return NotFound(new NotFoundByIdResponse(typeof(Project).Name, id));
 
@@ -44,11 +45,11 @@ public class ProjectController : ControllerBase
     [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [ProducesResponseType(typeof(Project), (int)HttpStatusCode.Created)]
-    public async Task<ActionResult<Project>> AddProject([FromBody, Required] AddProjectRequest model)
+    public async Task<ActionResult<Project>> Add([FromBody, Required] AddProjectRequest model)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var counterparty = await _contextDb.Counterparty.SingleOrDefaultAsync(_ => _.Id == model.CounterpartyId);
+        var counterparty = await _dbContext.Counterparties.SingleOrDefaultAsync(_ => _.Id == model.CounterpartyId);
 
         if (counterparty == null) return NotFound(new NotFoundByIdResponse(typeof(Counterparty).Name, model.CounterpartyId));
 
@@ -58,32 +59,32 @@ public class ProjectController : ControllerBase
             Name = model.Name
         };
 
-        _contextDb.Project.Add(project);
+        _dbContext.Projects.Add(project);
 
-        await _contextDb.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
 
-        return CreatedAtAction("AddProject", project);
+        return CreatedAtAction("Add", project);
     }
 
-    [HttpPut]
+    [HttpPut("{id}")]
     [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [ProducesResponseType(typeof(Project), (int)HttpStatusCode.NotFound)]
     [ProducesResponseType(typeof(Project), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult<Project>> UpdateProject([FromBody, Required] UpdateProjectRequest model)
+    public async Task<ActionResult<Project>> Update(int id, [FromBody, Required] UpdateProjectRequest model)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var project = await _contextDb.Project.Include(_ => _.Counterparty).SingleOrDefaultAsync(_ => _.Id == model.Id);
+        var project = await _dbContext.Projects.SingleOrDefaultAsync(_ => _.Id == id);
 
-        if (project == null) return NotFound(new NotFoundByIdResponse(typeof(Project).Name, model.Id));
+        if (project == null) return NotFound(new NotFoundByIdResponse(typeof(Project).Name, id));
 
         project.IsMarked = model.IsMarked;
         project.Name = model.Name;
 
-        _contextDb.Project.Update(project);
+        _dbContext.Projects.Update(project);
 
-        await _contextDb.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
 
         return Ok(project);
     }

@@ -1,24 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Mime;
 using TaskTracker.API.Controllers.Shared;
 using TaskTracker.API.DTOs.Counterparties;
 using TaskTracker.Domain.Entities;
-using TaskTracker.Infrastructure;
-using TaskTracker.Infrastructure.Repositories;
+using TaskTracker.Infrastructure.Repositories.Interfaces;
 
 namespace TaskTracker.API.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
     [Produces(MediaTypeNames.Application.Json)]
-    public class CounterpartyController : ControllerBase
+    public class CounterpartiesController : ControllerBase
     {
-         private readonly ICounterpartyRepo _repo;
+        private readonly ICounterpartyRepository _repo;
 
-        public CounterpartyController(ICounterpartyRepo repo)
+        public CounterpartiesController(ICounterpartyRepository repo)
         {
             _repo = repo;
         }
@@ -61,18 +59,18 @@ namespace TaskTracker.API.Controllers
             return CreatedAtAction("Add", counterparty);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(Counterparty), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(Counterparty), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<Counterparty>> Update([FromBody, Required] UpdateCounterpartyRequest model)
+        public async Task<ActionResult<Counterparty>> Update(int id, [FromBody, Required] UpdateCounterpartyRequest model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var counterparty = await _repo.GetById(model.Id);
+            var counterparty = await _repo.GetById(id);
 
-            if (counterparty == null) return NotFound(new NotFoundByIdResponse(typeof(Counterparty).Name, model.Id));
+            if (counterparty == null) return NotFound(new NotFoundByIdResponse(typeof(Counterparty).Name, id));
 
             counterparty.IsMarked = model.IsMarked;
             counterparty.Name = model.Name;
